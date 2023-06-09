@@ -12,7 +12,7 @@
 //License for the specific language governing permissions and limitations
 // under the License.
 
-//Package handle ...
+// Package handle ...
 package handle
 
 import (
@@ -45,7 +45,7 @@ type CompositionServiceRPCs struct {
 	GetCompositionReservationsRPC func(req compositionserviceproto.GetCompositionResourceRequest) (*compositionserviceproto.CompositionServiceResponse, error)
 }
 
-//GetCompositionService fetches all composition service
+// GetCompositionService fetches all composition service
 func (cs *CompositionServiceRPCs) GetCompositionService(ctx iris.Context) {
 	defer ctx.Next()
 	req := compositionserviceproto.GetCompositionServiceRequest{

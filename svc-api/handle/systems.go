@@ -47,33 +47,22 @@ func (sys *SystemRPCs) GetSystemsCollection(ctx iris.Context) {
 	ctxt := ctx.Request().Context()
 	defer ctx.Next()
 	req := systemsproto.GetSystemsRequest{
-		SessionToken: ctx.Request().Header.Get("X-Auth-Token"),
+		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
 		URL:          ctx.Request().RequestURI,
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting systems collection %s", req.URL)
 	if req.SessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	resp, err := sys.GetSystemsCollectionRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting systems collection is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendSystemsResponse(ctx, resp)
 }
 
 // GetSystem fetches computer system details
@@ -81,35 +70,24 @@ func (sys *SystemRPCs) GetSystem(ctx iris.Context) {
 	ctxt := ctx.Request().Context()
 	defer ctx.Next()
 	req := systemsproto.GetSystemsRequest{
-		SessionToken: ctx.Request().Header.Get("X-Auth-Token"),
+		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
 		RequestParam: ctx.Params().Get("id"),
 		ResourceID:   ctx.Params().Get("rid"),
 		URL:          ctx.Request().RequestURI,
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting system with URL %s", req.URL)
 	if req.SessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	resp, err := sys.GetSystemRPC(ctxt, req)
 	if err != nil {
-		errorMessage := "RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := rpcFailedErrMsg + err.Error()
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting system details is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET, PATCH")
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendSystemsResponse(ctx, resp)
 }
 
 // GetSystemResource defines the GetSystemResource iris handler.
@@ -120,29 +98,20 @@ func (sys *SystemRPCs) GetSystemResource(ctx iris.Context) {
 	ctxt := ctx.Request().Context()
 	defer ctx.Next()
 	req := systemsproto.GetSystemsRequest{
-		SessionToken: ctx.Request().Header.Get("X-Auth-Token"),
+		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
 		RequestParam: ctx.Params().Get("id"),
 		ResourceID:   ctx.Params().Get("rid"),
 		URL:          ctx.Request().RequestURI,
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting system resources with URL %s", req.URL)
 	if req.SessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	resp, err := sys.GetSystemResourceRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 
 	storageID := ctx.Params().Get("id2")
@@ -159,9 +128,7 @@ func (sys *SystemRPCs) GetSystemResource(ctx iris.Context) {
 		ctx.ResponseWriter().Header().Set("Allow", "GET")
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting systems resources is %s with status code %d", string(resp.Body), int(resp.StatusCode))
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendSystemsResponse(ctx, resp)
 }
 
 // ComputerSystemReset resets the indivitual computer systems
@@ -180,14 +147,10 @@ func (sys *SystemRPCs) ComputerSystemReset(ctx iris.Context) {
 		return
 	}
 	systemID := ctx.Params().Get("id")
-	sessionToken := ctx.Request().Header.Get("X-Auth-Token")
+	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
 	if sessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 
 	// Marshalling the req to make reset request
@@ -200,18 +163,11 @@ func (sys *SystemRPCs) ComputerSystemReset(ctx iris.Context) {
 	l.LogWithFields(ctxt).Debugf("Incoming request received for computer system reset with request body %s", string(request))
 	resp, err := sys.SystemResetRPC(ctxt, resetRequest)
 	if err != nil {
-		errorMessage := "RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := rpcFailedErrMsg + err.Error()
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for computer system reset is %s with status code %d", string(resp.Body), int(resp.StatusCode))
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendSystemsResponse(ctx, resp)
 }
 
 // SetDefaultBootOrder is the handler to set default boot order
@@ -222,30 +178,19 @@ func (sys *SystemRPCs) SetDefaultBootOrder(ctx iris.Context) {
 	ctxt := ctx.Request().Context()
 	var req systemsproto.DefaultBootOrderRequest
 	req.SystemID = ctx.Params().Get("id")
-	req.SessionToken = ctx.Request().Header.Get("X-Auth-Token")
+	req.SessionToken = ctx.Request().Header.Get(AuthTokenHeader)
 	if req.SessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for setting default boot order with request id %s", req.SystemID)
 	resp, err := sys.SetDefaultBootOrderRPC(ctxt, req)
 	if err != nil {
-		errorMessage := "RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := rpcFailedErrMsg + err.Error()
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for setting default boot order is %s with status code %d", string(resp.Body), int(resp.StatusCode))
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendSystemsResponse(ctx, resp)
 }
 
 // ChangeBiosSettings is the handler to set change bios settings
@@ -276,14 +221,10 @@ func (sys *SystemRPCs) ChangeBiosSettings(ctx iris.Context) {
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for changing bios setting with request body %s", string(request))
-	sessionToken := ctx.Request().Header.Get("X-Auth-Token")
+	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
 	if sessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	biosRequest := systemsproto.BiosSettingsRequest{
 		SessionToken: sessionToken,
@@ -292,18 +233,11 @@ func (sys *SystemRPCs) ChangeBiosSettings(ctx iris.Context) {
 	}
 	resp, err := sys.ChangeBiosSettingsRPC(ctxt, biosRequest)
 	if err != nil {
-		errorMessage := "RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := rpcFailedErrMsg + err.Error()
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for changing bios setting is %s with status code %d", string(resp.Body), int(resp.StatusCode))
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendSystemsResponse(ctx, resp)
 }
 
 // ChangeBootOrderSettings is the handler to set change boot order settings
@@ -334,14 +268,10 @@ func (sys *SystemRPCs) ChangeBootOrderSettings(ctx iris.Context) {
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for changing boot order setting with request body %s", string(request))
-	sessionToken := ctx.Request().Header.Get("X-Auth-Token")
+	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
 	if sessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	bootOrderRequest := systemsproto.BootOrderSettingsRequest{
 		SessionToken: sessionToken,
@@ -350,18 +280,11 @@ func (sys *SystemRPCs) ChangeBootOrderSettings(ctx iris.Context) {
 	}
 	resp, err := sys.ChangeBootOrderSettingsRPC(ctxt, bootOrderRequest)
 	if err != nil {
-		errorMessage := "RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := rpcFailedErrMsg + err.Error()
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting changing boot order setting is %s with status code %d", string(resp.Body), int(resp.StatusCode))
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendSystemsResponse(ctx, resp)
 }
 
 // UpdateSecureBoot is the handler to set change boot order settings
@@ -392,14 +315,10 @@ func (sys *SystemRPCs) UpdateSecureBoot(ctx iris.Context) {
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for updating SecureBoot with request body %s", string(request))
-	sessionToken := ctx.Request().Header.Get("X-Auth-Token")
+	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
 	if sessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	secureBootRequest := systemsproto.SecureBootRequest{
 		SessionToken: sessionToken,
@@ -408,18 +327,11 @@ func (sys *SystemRPCs) UpdateSecureBoot(ctx iris.Context) {
 	}
 	resp, err := sys.UpdateSecureBootRPC(ctxt, secureBootRequest)
 	if err != nil {
-		errorMessage := "RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := rpcFailedErrMsg + err.Error()
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for updating SecureBoot is %s with status code %d", string(resp.Body), int(resp.StatusCode))
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendSystemsResponse(ctx, resp)
 }
 
 // ResetSecureBoot shall reset the UEFI Secure Boot key databases.
@@ -451,14 +363,10 @@ func (sys *SystemRPCs) ResetSecureBoot(ctx iris.Context) {
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for resetting SecureBoot with request body %s", string(request))
-	sessionToken := ctx.Request().Header.Get("X-Auth-Token")
+	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
 	if sessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	secureBootRequest := systemsproto.SecureBootRequest{
 		SessionToken: sessionToken,
@@ -467,18 +375,11 @@ func (sys *SystemRPCs) ResetSecureBoot(ctx iris.Context) {
 	}
 	resp, err := sys.ResetSecureBootRPC(ctxt, secureBootRequest)
 	if err != nil {
-		errorMessage := "RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := rpcFailedErrMsg + err.Error()
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for updating SecureBoot is %s with status code %d", string(resp.Body), int(resp.StatusCode))
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendSystemsResponse(ctx, resp)
 }
 
 // CreateVolume is the handler to create a volume under storage
@@ -509,14 +410,10 @@ func (sys *SystemRPCs) CreateVolume(ctx iris.Context) {
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for creating volume with request body %s", string(request))
-	sessionToken := ctx.Request().Header.Get("X-Auth-Token")
+	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
 	if sessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	volRequest := systemsproto.VolumeRequest{
 		SessionToken:    sessionToken,
@@ -526,18 +423,11 @@ func (sys *SystemRPCs) CreateVolume(ctx iris.Context) {
 	}
 	resp, err := sys.CreateVolumeRPC(ctxt, volRequest)
 	if err != nil {
-		errorMessage := "RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := rpcFailedErrMsg + err.Error()
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for creating a volume is %s with status code %d", string(resp.Body), int(resp.StatusCode))
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendSystemsResponse(ctx, resp)
 }
 
 // DeleteVolume is the handler to delete a volume under storage
@@ -559,14 +449,10 @@ func (sys *SystemRPCs) DeleteVolume(ctx iris.Context) {
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for deleting volume with request body %s", string(request))
-	sessionToken := ctx.Request().Header.Get("X-Auth-Token")
+	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
 	if sessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	volRequest := systemsproto.VolumeRequest{
 		SessionToken:    sessionToken,
@@ -577,15 +463,15 @@ func (sys *SystemRPCs) DeleteVolume(ctx iris.Context) {
 	}
 	resp, err := sys.DeleteVolumeRPC(ctxt, volRequest)
 	if err != nil {
-		errorMessage := "RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := rpcFailedErrMsg + err.Error()
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for deleting a volume is %s with status code %d", string(resp.Body), int(resp.StatusCode))
+	sendSystemsResponse(ctx, resp)
+}
+
+// sendSystemsResponse writes the systems response to client
+func sendSystemsResponse(ctx iris.Context, resp *systemsproto.SystemsResponse) {
 	common.SetResponseHeader(ctx, resp.Header)
 	ctx.StatusCode(int(resp.StatusCode))
 	ctx.Write(resp.Body)
