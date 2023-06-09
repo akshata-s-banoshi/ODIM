@@ -121,7 +121,7 @@ func CreateContext(transactionID, actionID, actionName, threadID, threadName, pr
 	return ctx
 }
 
-// SendInvalidSessionResponseToClient writes the response to client when no valid session is found
+// SendInvalidSessionResponse writes the response to client when no valid session is found
 func SendInvalidSessionResponse(ctx iris.Context, errorMessage string) {
 	response := GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
 	SetResponseHeader(ctx, response.Header)
@@ -130,7 +130,7 @@ func SendInvalidSessionResponse(ctx iris.Context, errorMessage string) {
 	return
 }
 
-// SendFailedRPCCallResponseToClient writes the response to client when a RPC call fails
+// SendFailedRPCCallResponse writes the response to client when a RPC call fails
 func SendFailedRPCCallResponse(ctxt context.Context, ctx iris.Context, errorMessage string) {
 	l.LogWithFields(ctxt).Error(errorMessage)
 	response := GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
