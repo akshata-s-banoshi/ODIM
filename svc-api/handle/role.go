@@ -45,29 +45,18 @@ func (r *RoleRPCs) GetAllRoles(ctx iris.Context) {
 	l.LogWithFields(ctxt).Debug("Incoming request received for the getting all roles")
 	req := roleproto.GetRoleRequest{SessionToken: ctx.Request().Header.Get("X-Auth-Token")}
 	if req.SessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 
 	resp, err := r.GetAllRolesRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "RPC error: " + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for Getting all roles is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendRoleResponse(ctx, resp)
 }
 
 // GetRole defines the GetRole iris handler.
@@ -80,24 +69,15 @@ func (r *RoleRPCs) GetRole(ctx iris.Context) {
 	ctxt := ctx.Request().Context()
 	req := roleproto.GetRoleRequest{SessionToken: ctx.Request().Header.Get("X-Auth-Token")}
 	if req.SessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	req.Id = ctx.Params().Get("id")
 	l.LogWithFields(ctxt).Debugf("Incoming request received for the getting a role with id %s", req.Id)
 	resp, err := r.GetRoleRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	if req.Id == common.RoleAdmin || req.Id == common.RoleClient || req.Id == common.RoleMonitor {
 		ctx.ResponseWriter().Header().Set("Allow", "GET, PATCH")
@@ -105,9 +85,7 @@ func (r *RoleRPCs) GetRole(ctx iris.Context) {
 		ctx.ResponseWriter().Header().Set("Allow", "GET, PATCH, DELETE")
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for Getting a role is %s and response status %d", string(resp.Body), int(resp.StatusCode))
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendRoleResponse(ctx, resp)
 }
 
 // UpdateRole defines the UpdateRole iris handler.
@@ -135,12 +113,8 @@ func (r *RoleRPCs) UpdateRole(ctx iris.Context) {
 
 	req.SessionToken = ctx.Request().Header.Get("X-Auth-Token")
 	if req.SessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	req.Id = ctx.Params().Get("id")
 	l.LogWithFields(ctxt).Debugf("Incoming request received for the updating a role with id %s", req.Id)
@@ -148,17 +122,10 @@ func (r *RoleRPCs) UpdateRole(ctx iris.Context) {
 	resp, err := r.UpdateRoleRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for updating a role is %s and response status %d", string(resp.Body), int(resp.StatusCode))
-	common.SetResponseHeader(ctx, resp.Header)
-	ctx.StatusCode(int(resp.StatusCode))
-	ctx.Write(resp.Body)
+	sendRoleResponse(ctx, resp)
 }
 
 // DeleteRole ...
@@ -169,26 +136,22 @@ func (r *RoleRPCs) DeleteRole(ctx iris.Context) {
 
 	req.SessionToken = ctx.Request().Header.Get("X-Auth-Token")
 	if req.SessionToken == "" {
-		errorMessage := "error: no X-Auth-Token found in request header"
-		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.JSON(&response.Body)
-		return
+		errorMessage := invalidAuthTokenErrorMsg
+		common.SendInvalidSessionResponse(ctx, errorMessage)
 	}
 	req.ID = ctx.Params().Get("id")
 	l.LogWithFields(ctxt).Debugf("Incoming request received for the deleting a role with id %s", req.ID)
 	resp, err := r.DeleteRoleRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error: something went wrong with the RPC calls: " + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for deleting a role is %s and response status %d", string(resp.Body), int(resp.StatusCode))
+	sendRoleResponse(ctx, resp)
+}
+
+// sendRoleResponse writes the role response to client
+func sendRoleResponse(ctx iris.Context, resp *roleproto.RoleResponse) {
 	common.SetResponseHeader(ctx, resp.Header)
 	ctx.StatusCode(int(resp.StatusCode))
 	ctx.Write(resp.Body)
