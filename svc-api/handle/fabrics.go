@@ -18,12 +18,10 @@ package handle
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 
 	"github.com/ODIM-Project/ODIM/lib-utilities/common"
 	l "github.com/ODIM-Project/ODIM/lib-utilities/logs"
 	fabricsproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/fabrics"
-	"github.com/ODIM-Project/ODIM/lib-utilities/response"
 	iris "github.com/kataras/iris/v12"
 )
 
@@ -381,12 +379,7 @@ func (f *FabricRPCs) UpdateFabricResource(ctx iris.Context) {
 	err := ctx.ReadJSON(&createReq)
 	if err != nil {
 		errorMessage := "error while trying to get JSON body from the  request body: " + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusBadRequest)
-		ctx.JSON(&response.Body)
-		return
+		common.SendMalformedJSONRequestErrResponse(ctxt, ctx, errorMessage)
 	}
 
 	// marshalling the req to make fabric UpdateFabricResource request
@@ -394,12 +387,7 @@ func (f *FabricRPCs) UpdateFabricResource(ctx iris.Context) {
 	request, err := json.Marshal(createReq)
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
-		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
-		return
+		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for updating fabric resources with request url %s and request body %s", req.URL, string(request))
 	req.RequestBody = request
