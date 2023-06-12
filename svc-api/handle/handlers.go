@@ -823,6 +823,7 @@ func (r *Registry) GetRegistryFileCollection(ctx iris.Context) {
 	if sessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
 		common.SendInvalidSessionResponse(ctx, errorMessage)
+		return
 	}
 	authResp, err := r.Auth(ctxt, sessionToken, []string{common.PrivilegeLogin}, []string{})
 	if authResp.StatusCode != http.StatusOK {
@@ -906,6 +907,7 @@ func (r *Registry) GetMessageRegistryFileID(ctx iris.Context) {
 	if sessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
 		common.SendInvalidSessionResponse(ctx, errorMessage)
+		return
 	}
 	authResp, err := r.Auth(ctxt, sessionToken, []string{common.PrivilegeLogin}, []string{})
 	if authResp.StatusCode != http.StatusOK {
@@ -998,6 +1000,7 @@ func (r *Registry) GetMessageRegistryFile(ctx iris.Context) {
 	if sessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
 		common.SendInvalidSessionResponse(ctx, errorMessage)
+		return
 	}
 	authResp, err := r.Auth(ctxt, sessionToken, []string{common.PrivilegeLogin}, []string{})
 	if authResp.StatusCode != http.StatusOK {

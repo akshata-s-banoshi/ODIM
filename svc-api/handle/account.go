@@ -56,6 +56,7 @@ func (a *AccountRPCs) GetAccountService(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for Getting Account service is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -98,6 +99,7 @@ func (a *AccountRPCs) CreateAccount(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 
 	sendAccountResponse(ctx, resp)
@@ -126,6 +128,7 @@ func (a *AccountRPCs) GetAllAccounts(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 
 	ctx.ResponseWriter().Header().Set("Allow", "GET, POST")
@@ -157,6 +160,7 @@ func (a *AccountRPCs) GetAccount(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 
 	ctx.ResponseWriter().Header().Set("Allow", "GET, PATCH, DELETE")
@@ -204,6 +208,7 @@ func (a *AccountRPCs) UpdateAccount(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 
 	sendAccountResponse(ctx, resp)
@@ -234,6 +239,7 @@ func (a *AccountRPCs) DeleteAccount(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 
 	sendAccountResponse(ctx, resp)

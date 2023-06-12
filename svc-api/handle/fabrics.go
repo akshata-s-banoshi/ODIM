@@ -55,6 +55,7 @@ func (f *FabricRPCs) GetFabricCollection(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET"`,
@@ -82,6 +83,7 @@ func (f *FabricRPCs) GetFabric(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET"`,
@@ -109,6 +111,7 @@ func (f *FabricRPCs) GetFabricSwitchCollection(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET"`,
@@ -136,6 +139,7 @@ func (f *FabricRPCs) GetFabricSwitch(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET"`,
@@ -163,6 +167,7 @@ func (f *FabricRPCs) GetSwitchPortCollection(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET"`,
@@ -190,6 +195,7 @@ func (f *FabricRPCs) GetSwitchPort(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET", "PATCH"`,
@@ -217,6 +223,7 @@ func (f *FabricRPCs) GetFabricZoneCollection(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET", "POST"`,
@@ -244,6 +251,7 @@ func (f *FabricRPCs) GetFabricZone(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET", "PUT", "PATCH", "DELETE"`,
@@ -271,6 +279,7 @@ func (f *FabricRPCs) GetFabricEndPointCollection(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET", "POST"`,
@@ -298,6 +307,7 @@ func (f *FabricRPCs) GetFabricEndPoints(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET", "PUT", "PATCH", "DELETE"`,
@@ -325,6 +335,7 @@ func (f *FabricRPCs) GetFabricAddressPoolCollection(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET",  "POST"`,
@@ -352,6 +363,7 @@ func (f *FabricRPCs) GetFabricAddressPool(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	resp.Header = map[string]string{
 		"Allow": `"GET", "PUT", "PATCH", "DELETE"`,
@@ -388,6 +400,7 @@ func (f *FabricRPCs) UpdateFabricResource(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for updating fabric resources with request url %s and request body %s", req.URL, string(request))
 	req.RequestBody = request
@@ -395,6 +408,7 @@ func (f *FabricRPCs) UpdateFabricResource(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for updating fabric resource is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendFabricResponse(ctx, resp)
@@ -419,6 +433,7 @@ func (f *FabricRPCs) DeleteFabricResource(ctx iris.Context) {
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
 		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		return
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for deleting fabric resource is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendFabricResponse(ctx, resp)

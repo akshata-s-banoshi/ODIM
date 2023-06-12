@@ -60,6 +60,7 @@ func (cs *CompositionServiceRPCs) GetCompositionService(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -82,6 +83,7 @@ func (cs *CompositionServiceRPCs) GetResourceBlockCollection(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -105,6 +107,7 @@ func (cs *CompositionServiceRPCs) GetResourceBlock(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -125,6 +128,7 @@ func (cs *CompositionServiceRPCs) CreateResourceBlock(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
 		writeErrorResponse(ctx, http.StatusBadRequest, response.MalformedJSON, errorMessage)
+		return
 	}
 
 	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
@@ -143,6 +147,7 @@ func (cs *CompositionServiceRPCs) CreateResourceBlock(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -168,6 +173,7 @@ func (cs *CompositionServiceRPCs) DeleteResourceBlock(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -190,6 +196,7 @@ func (cs *CompositionServiceRPCs) GetResourceZoneCollection(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -213,6 +220,7 @@ func (cs *CompositionServiceRPCs) GetResourceZone(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -233,6 +241,7 @@ func (cs *CompositionServiceRPCs) CreateResourceZone(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
 		writeErrorResponse(ctx, http.StatusBadRequest, response.MalformedJSON, errorMessage)
+		return
 	}
 
 	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
@@ -251,6 +260,7 @@ func (cs *CompositionServiceRPCs) CreateResourceZone(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -276,6 +286,7 @@ func (cs *CompositionServiceRPCs) DeleteResourceZone(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -297,6 +308,7 @@ func (cs *CompositionServiceRPCs) Compose(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
 		writeErrorResponse(ctx, http.StatusBadRequest, response.MalformedJSON, errorMessage)
+		return
 	}
 
 	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
@@ -315,6 +327,7 @@ func (cs *CompositionServiceRPCs) Compose(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -338,6 +351,7 @@ func (cs *CompositionServiceRPCs) GetActivePool(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -361,6 +375,7 @@ func (cs *CompositionServiceRPCs) GetFreePool(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
@@ -384,6 +399,7 @@ func (cs *CompositionServiceRPCs) GetCompositionReservations(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
 		writeErrorResponse(ctx, http.StatusInternalServerError, response.InternalError, errorMessage)
+		return
 	}
 
 	common.SetResponseHeader(ctx, resp.Header)
