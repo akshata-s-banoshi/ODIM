@@ -19,7 +19,6 @@ import (
 	"context"
 	"net/http"
 
-	l "github.com/ODIM-Project/ODIM/lib-utilities/logs"
 	"github.com/ODIM-Project/ODIM/lib-utilities/response"
 	iris "github.com/kataras/iris/v12"
 	"google.golang.org/grpc/metadata"
@@ -131,8 +130,7 @@ func SendInvalidSessionResponse(ctx iris.Context, errorMessage string) {
 }
 
 // SendFailedRPCCallResponse writes the response to client when a RPC call fails
-func SendFailedRPCCallResponse(ctxt context.Context, ctx iris.Context, errorMessage string) {
-	l.LogWithFields(ctxt).Error(errorMessage)
+func SendFailedRPCCallResponse(ctx iris.Context, errorMessage string) {
 	response := GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
 	SetResponseHeader(ctx, response.Header)
 	ctx.StatusCode(http.StatusInternalServerError)
@@ -141,8 +139,7 @@ func SendFailedRPCCallResponse(ctxt context.Context, ctx iris.Context, errorMess
 }
 
 // SendMalformedJSONRequestErrResponse writes the response to client when the request contains malformed JSON structure
-func SendMalformedJSONRequestErrResponse(ctxt context.Context, ctx iris.Context, errorMessage string) {
-	l.LogWithFields(ctxt).Error(errorMessage)
+func SendMalformedJSONRequestErrResponse(ctx iris.Context, errorMessage string) {
 	response := GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
 	SetResponseHeader(ctx, response.Header)
 	ctx.StatusCode(http.StatusBadRequest)

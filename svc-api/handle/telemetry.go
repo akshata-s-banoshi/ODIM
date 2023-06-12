@@ -58,7 +58,8 @@ func (a *TelemetryRPCs) GetTelemetryService(ctx iris.Context) {
 	resp, err := a.GetTelemetryServiceRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting telemetry service is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -84,7 +85,8 @@ func (a *TelemetryRPCs) GetMetricDefinitionCollection(ctx iris.Context) {
 	resp, err := a.GetMetricDefinitionCollectionRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting metric definition collection is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -110,7 +112,8 @@ func (a *TelemetryRPCs) GetMetricReportDefinitionCollection(ctx iris.Context) {
 	resp, err := a.GetMetricReportDefinitionCollectionRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting metric report definition collection is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -136,7 +139,8 @@ func (a *TelemetryRPCs) GetMetricReportCollection(ctx iris.Context) {
 	resp, err := a.GetMetricReportCollectionRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting metric report collection is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -162,7 +166,8 @@ func (a *TelemetryRPCs) GetTriggerCollection(ctx iris.Context) {
 	resp, err := a.GetTriggerCollectionRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting trigger collection is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -188,7 +193,8 @@ func (a *TelemetryRPCs) GetMetricDefinition(ctx iris.Context) {
 	resp, err := a.GetMetricDefinitionRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting metric definition is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -214,7 +220,8 @@ func (a *TelemetryRPCs) GetMetricReportDefinition(ctx iris.Context) {
 	resp, err := a.GetMetricReportDefinitionRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting metric report definition is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -240,7 +247,8 @@ func (a *TelemetryRPCs) GetMetricReport(ctx iris.Context) {
 	resp, err := a.GetMetricReportRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting metric definition collection is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -266,7 +274,8 @@ func (a *TelemetryRPCs) GetTrigger(ctx iris.Context) {
 	resp, err := a.GetTriggerRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting trigger details is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET, PATCH")
@@ -291,7 +300,8 @@ func (a *TelemetryRPCs) UpdateTrigger(ctx iris.Context) {
 	resp, err := a.UpdateTriggerRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for updating trigger is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	common.SetResponseHeader(ctx, resp.Header)

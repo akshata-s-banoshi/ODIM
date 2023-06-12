@@ -18,12 +18,10 @@ package handle
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 
 	"github.com/ODIM-Project/ODIM/lib-utilities/common"
 	l "github.com/ODIM-Project/ODIM/lib-utilities/logs"
 	roleproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/role"
-	"github.com/ODIM-Project/ODIM/lib-utilities/response"
 	iris "github.com/kataras/iris/v12"
 )
 
@@ -52,7 +50,8 @@ func (r *RoleRPCs) GetAllRoles(ctx iris.Context) {
 	resp, err := r.GetAllRolesRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "RPC error: " + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for Getting all roles is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -77,7 +76,8 @@ func (r *RoleRPCs) GetRole(ctx iris.Context) {
 	resp, err := r.GetRoleRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	if req.Id == common.RoleAdmin || req.Id == common.RoleClient || req.Id == common.RoleMonitor {
 		ctx.ResponseWriter().Header().Set("Allow", "GET, PATCH")
@@ -104,11 +104,7 @@ func (r *RoleRPCs) UpdateRole(ctx iris.Context) {
 	if err != nil {
 		l.LogWithFields(ctxt).Error("Error while trying to collect data from request: " + err.Error())
 		errorMessage := "error while trying to get JSON body from the role update request body: " + err.Error()
-		response := common.GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusBadRequest)
-		ctx.JSON(response.Body)
-		return
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 
 	req.SessionToken = ctx.Request().Header.Get("X-Auth-Token")
@@ -122,7 +118,8 @@ func (r *RoleRPCs) UpdateRole(ctx iris.Context) {
 	resp, err := r.UpdateRoleRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for updating a role is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	sendRoleResponse(ctx, resp)
@@ -144,7 +141,8 @@ func (r *RoleRPCs) DeleteRole(ctx iris.Context) {
 	resp, err := r.DeleteRoleRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error: something went wrong with the RPC calls: " + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for deleting a role is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	sendRoleResponse(ctx, resp)

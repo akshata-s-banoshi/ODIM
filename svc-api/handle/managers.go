@@ -18,12 +18,10 @@ package handle
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 
 	"github.com/ODIM-Project/ODIM/lib-utilities/common"
 	l "github.com/ODIM-Project/ODIM/lib-utilities/logs"
 	managersproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/managers"
-	"github.com/ODIM-Project/ODIM/lib-utilities/response"
 	iris "github.com/kataras/iris/v12"
 )
 
@@ -55,7 +53,8 @@ func (mgr *ManagersRPCs) GetManagersCollection(ctx iris.Context) {
 	resp, err := mgr.GetManagersCollectionRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for Getting Managers collection is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -79,7 +78,8 @@ func (mgr *ManagersRPCs) GetManager(ctx iris.Context) {
 	resp, err := mgr.GetManagersRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for getting Manager is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -93,12 +93,7 @@ func (mgr *ManagersRPCs) GetManager(ctx iris.Context) {
 func (mgr *ManagersRPCs) GetManagersResource(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := managersproto.ManagerRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		ManagerID:    ctx.Params().Get("id"),
-		ResourceID:   ctx.Params().Get("rid"),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getManagerRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for the getting a Managers resources with id %s and resource id %s", req.ManagerID, req.ResourceID)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -107,7 +102,8 @@ func (mgr *ManagersRPCs) GetManagersResource(ctx iris.Context) {
 	resp, err := mgr.GetManagersResourceRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for getting Manager resource is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -126,16 +122,13 @@ func (mgr *ManagersRPCs) VirtualMediaInsert(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "while trying to get JSON body from the virtual media actions request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusBadRequest)
-		ctx.JSON(&response.Body)
-		return
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 	request, err := json.Marshal(reqIn)
 	if err != nil {
 		errorMessage := "while trying to create JSON request body: " + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 
 	req := managersproto.ManagerRequest{
@@ -153,7 +146,8 @@ func (mgr *ManagersRPCs) VirtualMediaInsert(ctx iris.Context) {
 	resp, err := mgr.VirtualMediaInsertRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for virtual media insert is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	sendManagersResponse(ctx, resp)
@@ -166,12 +160,7 @@ func (mgr *ManagersRPCs) VirtualMediaInsert(ctx iris.Context) {
 func (mgr *ManagersRPCs) VirtualMediaEject(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := managersproto.ManagerRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		ManagerID:    ctx.Params().Get("id"),
-		ResourceID:   ctx.Params().Get("rid"),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getManagerRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for the virtual media eject with id %s", req.ManagerID)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrMsg
@@ -180,7 +169,8 @@ func (mgr *ManagersRPCs) VirtualMediaEject(ctx iris.Context) {
 	resp, err := mgr.VirtualMediaEjectRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for virtual media eject is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	sendManagersResponse(ctx, resp)
@@ -193,12 +183,7 @@ func (mgr *ManagersRPCs) VirtualMediaEject(ctx iris.Context) {
 func (mgr *ManagersRPCs) GetRemoteAccountService(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := managersproto.ManagerRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		ManagerID:    ctx.Params().Get("id"),
-		ResourceID:   ctx.Params().Get("rid"),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getManagerRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for the getting remote account service with id %s", req.ManagerID)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -207,7 +192,8 @@ func (mgr *ManagersRPCs) GetRemoteAccountService(ctx iris.Context) {
 	resp, err := mgr.GetRemoteAccountServiceRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 
 	switch req.URL {
@@ -234,16 +220,13 @@ func (mgr *ManagersRPCs) CreateRemoteAccountService(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "while trying to get JSON body from the create remote account request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusBadRequest)
-		ctx.JSON(&response.Body)
-		return
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 	request, err := json.Marshal(reqIn)
 	if err != nil {
 		errorMessage := "while trying to create JSON request body in create remote account: " + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 
 	req := managersproto.ManagerRequest{
@@ -261,7 +244,8 @@ func (mgr *ManagersRPCs) CreateRemoteAccountService(ctx iris.Context) {
 	resp, err := mgr.CreateRemoteAccountServiceRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for getting remote account service is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	sendManagersResponse(ctx, resp)
@@ -279,16 +263,13 @@ func (mgr *ManagersRPCs) UpdateRemoteAccountService(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "while trying to get JSON body from the update remote account request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusBadRequest)
-		ctx.JSON(&response.Body)
-		return
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 	request, err := json.Marshal(reqIn)
 	if err != nil {
 		errorMessage := "while trying to update JSON request body in update remote account: " + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 
 	req := managersproto.ManagerRequest{
@@ -306,7 +287,8 @@ func (mgr *ManagersRPCs) UpdateRemoteAccountService(ctx iris.Context) {
 	resp, err := mgr.UpdateRemoteAccountServiceRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for updating remote account service is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	sendManagersResponse(ctx, resp)
@@ -319,12 +301,7 @@ func (mgr *ManagersRPCs) UpdateRemoteAccountService(ctx iris.Context) {
 func (mgr *ManagersRPCs) DeleteRemoteAccountService(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := managersproto.ManagerRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		ManagerID:    ctx.Params().Get("id"),
-		ResourceID:   ctx.Params().Get("rid"),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getManagerRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for the deleting remote account service with id %s", req.ManagerID)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -333,7 +310,8 @@ func (mgr *ManagersRPCs) DeleteRemoteAccountService(ctx iris.Context) {
 	resp, err := mgr.DeleteRemoteAccountServiceRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for deleting remote account service is %s and response status %d", string(resp.Body), int(resp.StatusCode))
 	sendManagersResponse(ctx, resp)
@@ -344,4 +322,14 @@ func sendManagersResponse(ctx iris.Context, resp *managersproto.ManagerResponse)
 	common.SetResponseHeader(ctx, resp.Header)
 	ctx.StatusCode(int(resp.StatusCode))
 	ctx.Write(resp.Body)
+}
+
+// getManagerRequest will extract the request from the context and return
+func getManagerRequest(ctx iris.Context) managersproto.ManagerRequest {
+	return managersproto.ManagerRequest{
+		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
+		ManagerID:    ctx.Params().Get("id"),
+		ResourceID:   ctx.Params().Get("rid"),
+		URL:          ctx.Request().RequestURI,
+	}
 }

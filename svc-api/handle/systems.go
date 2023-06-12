@@ -18,12 +18,10 @@ package handle
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 
 	"github.com/ODIM-Project/ODIM/lib-utilities/common"
 	l "github.com/ODIM-Project/ODIM/lib-utilities/logs"
 	systemsproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/systems"
-	"github.com/ODIM-Project/ODIM/lib-utilities/response"
 	iris "github.com/kataras/iris/v12"
 )
 
@@ -58,7 +56,8 @@ func (sys *SystemRPCs) GetSystemsCollection(ctx iris.Context) {
 	resp, err := sys.GetSystemsCollectionRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting systems collection is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -83,7 +82,8 @@ func (sys *SystemRPCs) GetSystem(ctx iris.Context) {
 	resp, err := sys.GetSystemRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting system details is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET, PATCH")
@@ -111,7 +111,8 @@ func (sys *SystemRPCs) GetSystemResource(ctx iris.Context) {
 	resp, err := sys.GetSystemResourceRPC(ctxt, req)
 	if err != nil {
 		errorMessage := "error:  RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 
 	storageID := ctx.Params().Get("id2")
@@ -140,11 +141,7 @@ func (sys *SystemRPCs) ComputerSystemReset(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error while trying to get JSON body from the system reset request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusBadRequest)
-		ctx.JSON(&response.Body)
-		return
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 	systemID := ctx.Params().Get("id")
 	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
@@ -164,7 +161,8 @@ func (sys *SystemRPCs) ComputerSystemReset(ctx iris.Context) {
 	resp, err := sys.SystemResetRPC(ctxt, resetRequest)
 	if err != nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for computer system reset is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendSystemsResponse(ctx, resp)
@@ -187,7 +185,8 @@ func (sys *SystemRPCs) SetDefaultBootOrder(ctx iris.Context) {
 	resp, err := sys.SetDefaultBootOrderRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for setting default boot order is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendSystemsResponse(ctx, resp)
@@ -204,20 +203,13 @@ func (sys *SystemRPCs) ChangeBiosSettings(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error while trying to get JSON body from bios setting request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusBadRequest)
-		ctx.JSON(&response.Body)
-		return
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 	request, err := json.Marshal(req)
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for changing bios setting with request body %s", string(request))
@@ -234,7 +226,8 @@ func (sys *SystemRPCs) ChangeBiosSettings(ctx iris.Context) {
 	resp, err := sys.ChangeBiosSettingsRPC(ctxt, biosRequest)
 	if err != nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for changing bios setting is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendSystemsResponse(ctx, resp)
@@ -251,20 +244,13 @@ func (sys *SystemRPCs) ChangeBootOrderSettings(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error while trying to get JSON body from change boot order setting request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusBadRequest)
-		ctx.JSON(&response.Body)
-		return
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 	request, err := json.Marshal(req)
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for changing boot order setting with request body %s", string(request))
@@ -281,7 +267,8 @@ func (sys *SystemRPCs) ChangeBootOrderSettings(ctx iris.Context) {
 	resp, err := sys.ChangeBootOrderSettingsRPC(ctxt, bootOrderRequest)
 	if err != nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting changing boot order setting is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendSystemsResponse(ctx, resp)
@@ -298,20 +285,13 @@ func (sys *SystemRPCs) UpdateSecureBoot(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error while trying to get JSON body from update SecureBoot request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusBadRequest)
-		ctx.JSON(&response.Body)
-		return
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 	request, err := json.Marshal(req)
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for updating SecureBoot with request body %s", string(request))
@@ -328,7 +308,8 @@ func (sys *SystemRPCs) UpdateSecureBoot(ctx iris.Context) {
 	resp, err := sys.UpdateSecureBootRPC(ctxt, secureBootRequest)
 	if err != nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for updating SecureBoot is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendSystemsResponse(ctx, resp)
@@ -346,20 +327,13 @@ func (sys *SystemRPCs) ResetSecureBoot(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error while trying to get JSON body from reset SecureBoot key databases request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusBadRequest)
-		ctx.JSON(&response.Body)
-		return
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 	request, err := json.Marshal(req)
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for resetting SecureBoot with request body %s", string(request))
@@ -376,7 +350,8 @@ func (sys *SystemRPCs) ResetSecureBoot(ctx iris.Context) {
 	resp, err := sys.ResetSecureBootRPC(ctxt, secureBootRequest)
 	if err != nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for updating SecureBoot is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendSystemsResponse(ctx, resp)
@@ -393,20 +368,13 @@ func (sys *SystemRPCs) CreateVolume(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error while trying to get JSON body from the create volume request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusBadRequest, response.MalformedJSON, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusBadRequest)
-		ctx.JSON(&response.Body)
-		return
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 	request, err := json.Marshal(req)
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for creating volume with request body %s", string(request))
@@ -424,7 +392,8 @@ func (sys *SystemRPCs) CreateVolume(ctx iris.Context) {
 	resp, err := sys.CreateVolumeRPC(ctxt, volRequest)
 	if err != nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for creating a volume is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendSystemsResponse(ctx, resp)
@@ -442,10 +411,7 @@ func (sys *SystemRPCs) DeleteVolume(ctx iris.Context) {
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
-		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
-		common.SetResponseHeader(ctx, response.Header)
-		ctx.StatusCode(http.StatusInternalServerError)
-		ctx.JSON(&response.Body)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for deleting volume with request body %s", string(request))
@@ -464,7 +430,8 @@ func (sys *SystemRPCs) DeleteVolume(ctx iris.Context) {
 	resp, err := sys.DeleteVolumeRPC(ctxt, volRequest)
 	if err != nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for deleting a volume is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendSystemsResponse(ctx, resp)

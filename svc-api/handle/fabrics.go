@@ -41,10 +41,7 @@ const (
 func (f *FabricRPCs) GetFabricCollection(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting fabric collection with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -54,7 +51,8 @@ func (f *FabricRPCs) GetFabricCollection(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -69,10 +67,7 @@ func (f *FabricRPCs) GetFabricCollection(ctx iris.Context) {
 func (f *FabricRPCs) GetFabric(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for creating fabric with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -82,7 +77,8 @@ func (f *FabricRPCs) GetFabric(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -97,10 +93,7 @@ func (f *FabricRPCs) GetFabric(ctx iris.Context) {
 func (f *FabricRPCs) GetFabricSwitchCollection(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting fabric switch collection with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -110,7 +103,8 @@ func (f *FabricRPCs) GetFabricSwitchCollection(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -125,10 +119,7 @@ func (f *FabricRPCs) GetFabricSwitchCollection(ctx iris.Context) {
 func (f *FabricRPCs) GetFabricSwitch(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for creating fabric switch with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -138,7 +129,8 @@ func (f *FabricRPCs) GetFabricSwitch(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -153,10 +145,7 @@ func (f *FabricRPCs) GetFabricSwitch(ctx iris.Context) {
 func (f *FabricRPCs) GetSwitchPortCollection(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting switch port collection with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -166,7 +155,8 @@ func (f *FabricRPCs) GetSwitchPortCollection(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -181,10 +171,7 @@ func (f *FabricRPCs) GetSwitchPortCollection(ctx iris.Context) {
 func (f *FabricRPCs) GetSwitchPort(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting switch port with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -194,7 +181,8 @@ func (f *FabricRPCs) GetSwitchPort(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -209,10 +197,7 @@ func (f *FabricRPCs) GetSwitchPort(ctx iris.Context) {
 func (f *FabricRPCs) GetFabricZoneCollection(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting fabric zone collection with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -222,7 +207,8 @@ func (f *FabricRPCs) GetFabricZoneCollection(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -237,10 +223,7 @@ func (f *FabricRPCs) GetFabricZoneCollection(ctx iris.Context) {
 func (f *FabricRPCs) GetFabricZone(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting fabric zone with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -250,7 +233,8 @@ func (f *FabricRPCs) GetFabricZone(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -265,10 +249,7 @@ func (f *FabricRPCs) GetFabricZone(ctx iris.Context) {
 func (f *FabricRPCs) GetFabricEndPointCollection(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting fabric endpoint collection with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -278,7 +259,8 @@ func (f *FabricRPCs) GetFabricEndPointCollection(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -293,10 +275,7 @@ func (f *FabricRPCs) GetFabricEndPointCollection(ctx iris.Context) {
 func (f *FabricRPCs) GetFabricEndPoints(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting fabric endpoint with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -306,7 +285,8 @@ func (f *FabricRPCs) GetFabricEndPoints(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -321,10 +301,7 @@ func (f *FabricRPCs) GetFabricEndPoints(ctx iris.Context) {
 func (f *FabricRPCs) GetFabricAddressPoolCollection(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting fabric address pool collection with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -334,7 +311,8 @@ func (f *FabricRPCs) GetFabricAddressPoolCollection(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -349,10 +327,7 @@ func (f *FabricRPCs) GetFabricAddressPoolCollection(ctx iris.Context) {
 func (f *FabricRPCs) GetFabricAddressPool(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting fabric address pool with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -362,7 +337,8 @@ func (f *FabricRPCs) GetFabricAddressPool(ctx iris.Context) {
 	resp, err := f.GetFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	resp.Header = map[string]string{
@@ -391,7 +367,8 @@ func (f *FabricRPCs) UpdateFabricResource(ctx iris.Context) {
 	err := ctx.ReadJSON(&createReq)
 	if err != nil {
 		errorMessage := "error while trying to get JSON body from the  request body: " + err.Error()
-		common.SendMalformedJSONRequestErrResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 
 	// marshalling the req to make fabric UpdateFabricResource request
@@ -399,7 +376,8 @@ func (f *FabricRPCs) UpdateFabricResource(ctx iris.Context) {
 	request, err := json.Marshal(createReq)
 	if err != nil {
 		errorMessage := "error while trying to create JSON request body: " + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for updating fabric resources with request url %s and request body %s", req.URL, string(request))
@@ -407,7 +385,8 @@ func (f *FabricRPCs) UpdateFabricResource(ctx iris.Context) {
 	resp, err := f.UpdateFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for updating fabric resource is %s with status code %d", string(resp.Body), int(resp.StatusCode))
@@ -419,10 +398,7 @@ func (f *FabricRPCs) UpdateFabricResource(ctx iris.Context) {
 func (f *FabricRPCs) DeleteFabricResource(ctx iris.Context) {
 	defer ctx.Next()
 	ctxt := ctx.Request().Context()
-	req := fabricsproto.FabricRequest{
-		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
-		URL:          ctx.Request().RequestURI,
-	}
+	req := getFabricRequest(ctx)
 	l.LogWithFields(ctxt).Debugf("Incoming request received for deleting fabric resources with request url %s", req.URL)
 	if req.SessionToken == "" {
 		errorMessage := invalidAuthTokenErrorMsg
@@ -432,7 +408,8 @@ func (f *FabricRPCs) DeleteFabricResource(ctx iris.Context) {
 	resp, err := f.DeleteFabricResourceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for deleting fabric resource is %s with status code %d", string(resp.Body), int(resp.StatusCode))
@@ -444,4 +421,12 @@ func sendFabricResponse(ctx iris.Context, resp *fabricsproto.FabricResponse) {
 	common.SetResponseHeader(ctx, resp.Header)
 	ctx.StatusCode(int(resp.StatusCode))
 	ctx.Write(resp.Body)
+}
+
+// getFabricRequest will extract the request from the context and return
+func getFabricRequest(ctx iris.Context) fabricsproto.FabricRequest {
+	return fabricsproto.FabricRequest{
+		SessionToken: ctx.Request().Header.Get(AuthTokenHeader),
+		URL:          ctx.Request().RequestURI,
+	}
 }

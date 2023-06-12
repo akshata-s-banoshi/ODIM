@@ -56,7 +56,8 @@ func (a *UpdateRPCs) GetUpdateService(ctx iris.Context) {
 	resp, err := a.GetUpdateServiceRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting update service is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -78,7 +79,8 @@ func (a *UpdateRPCs) GetFirmwareInventoryCollection(ctx iris.Context) {
 	resp, err := a.GetFirmwareInventoryCollectionRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting firmware inventory collection is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -101,7 +103,8 @@ func (a *UpdateRPCs) GetSoftwareInventoryCollection(ctx iris.Context) {
 	resp, err := a.GetSoftwareInventoryCollectionRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting software inventory collection is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -126,7 +129,8 @@ func (a *UpdateRPCs) GetFirmwareInventory(ctx iris.Context) {
 	resp, err := a.GetFirmwareInventoryRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting firmware inventory details is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -151,7 +155,8 @@ func (a *UpdateRPCs) GetSoftwareInventory(ctx iris.Context) {
 	resp, err := a.GetSoftwareInventoryRPC(ctxt, req)
 	if err != nil {
 		errorMessage := rpcCallFailedErrorMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting software inventory details is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
@@ -167,7 +172,8 @@ func (a *UpdateRPCs) SimpleUpdate(ctx iris.Context) {
 	err := ctx.ReadJSON(&req)
 	if err != nil {
 		errorMessage := "error while trying to get JSON body from the simple update request body: " + err.Error()
-		common.SendMalformedJSONRequestErrResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
 	if sessionToken == "" {
@@ -191,7 +197,8 @@ func (a *UpdateRPCs) SimpleUpdate(ctx iris.Context) {
 	resp, err := a.SimpleUpdateRPC(ctxt, updateRequest)
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for simple update action is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendUpdateResponse(ctx, resp)
@@ -258,7 +265,8 @@ func (a *UpdateRPCs) StartUpdate(ctx iris.Context) {
 	resp, err := a.StartUpdateRPC(ctxt, updateRequest)
 	if err != nil {
 		errorMessage := "RPC error:" + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for start update action is %s with status code %d", string(resp.Body), int(resp.StatusCode))
 	sendUpdateResponse(ctx, resp)

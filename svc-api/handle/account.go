@@ -55,7 +55,8 @@ func (a *AccountRPCs) GetAccountService(ctx iris.Context) {
 	resp, err := a.GetServiceRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 	l.LogWithFields(ctx).Debugf("Outgoing response for Getting Account service is %s and response status %d", string(resp.Body), int(resp.StatusCode))
@@ -76,7 +77,8 @@ func (a *AccountRPCs) CreateAccount(ctx iris.Context) {
 	err := ctx.ReadJSON(&req)
 	if err != nil {
 		errorMessage := "error while trying to get JSON body from the account create request body: " + err.Error()
-		common.SendMalformedJSONRequestErrResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debug("Incoming request for create account received")
 	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
@@ -98,7 +100,8 @@ func (a *AccountRPCs) CreateAccount(ctx iris.Context) {
 	resp, err := a.CreateRPC(ctxt, createRequest)
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 
@@ -127,7 +130,8 @@ func (a *AccountRPCs) GetAllAccounts(ctx iris.Context) {
 	resp, err := a.GetAllAccountsRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 
@@ -159,7 +163,8 @@ func (a *AccountRPCs) GetAccount(ctx iris.Context) {
 	resp, err := a.GetAccountRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 
@@ -183,7 +188,8 @@ func (a *AccountRPCs) UpdateAccount(ctx iris.Context) {
 
 	if err != nil {
 		errorMessage := "error while trying to get JSON body from the account update request body: " + err.Error()
-		common.SendMalformedJSONRequestErrResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
 
 	sessionToken := ctx.Request().Header.Get(AuthTokenHeader)
@@ -207,7 +213,8 @@ func (a *AccountRPCs) UpdateAccount(ctx iris.Context) {
 	resp, err := a.UpdateRPC(ctxt, updateRequest)
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 
@@ -238,7 +245,8 @@ func (a *AccountRPCs) DeleteAccount(ctx iris.Context) {
 	resp, err := a.DeleteRPC(ctxt, req)
 	if err != nil && resp == nil {
 		errorMessage := rpcCallFailedErrMsg + err.Error()
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
 	}
 

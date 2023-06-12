@@ -1041,7 +1041,8 @@ func (r *Registry) GetMessageRegistryFile(ctx iris.Context) {
 		//return fmt.Errorf("error while trying to unmarshal the config data: %v", err)
 		l.LogWithFields(ctxt).Error(err.Error())
 		errorMessage := "error: Resource not found"
-		common.SendFailedRPCCallResponse(ctxt, ctx, errorMessage)
+		l.LogWithFields(ctxt).Error(errorMessage)
+		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	common.SetResponseHeader(ctx, headers)
 	ctx.JSON(data)
