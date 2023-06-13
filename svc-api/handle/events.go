@@ -49,6 +49,7 @@ func (e *EventsRPCs) GetEventService(ctx iris.Context) {
 	}
 	resp, err := e.GetEventServiceRPC(ctxt, req)
 	if err != nil {
+		l.LogWithFields(ctxt).Error(err.Error())
 		common.SendFailedRPCCallResponse(ctx, err.Error())
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for Getting Event service is %s and response status %d", string(resp.Body), int(resp.StatusCode))
@@ -81,6 +82,7 @@ func (e *EventsRPCs) CreateEventSubscription(ctx iris.Context) {
 	l.LogWithFields(ctxt).Debugf("Incoming request received for creating event subscription with request body %s", string(req.PostBody))
 	resp, err := e.CreateEventSubscriptionRPC(ctxt, req)
 	if err != nil {
+		l.LogWithFields(ctxt).Error(err.Error())
 		common.SendFailedRPCCallResponse(ctx, err.Error())
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for creating event subscription is %s with response code %d", string(resp.Body), int(resp.StatusCode))
@@ -113,6 +115,7 @@ func (e *EventsRPCs) SubmitTestEvent(ctx iris.Context) {
 	l.LogWithFields(ctxt).Debugf("Incoming request received for submit test event with request body %s", string(req.PostBody))
 	resp, err := e.SubmitTestEventRPC(ctxt, req)
 	if err != nil {
+		l.LogWithFields(ctxt).Error(err.Error())
 		common.SendFailedRPCCallResponse(ctx, err.Error())
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for submit test event is %s with response code %d", string(resp.Body), int(resp.StatusCode))
@@ -136,6 +139,7 @@ func (e *EventsRPCs) GetEventSubscription(ctx iris.Context) {
 
 	resp, err := e.GetEventSubscriptionRPC(ctxt, req)
 	if err != nil {
+		l.LogWithFields(ctxt).Error(err.Error())
 		common.SendFailedRPCCallResponse(ctx, err.Error())
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting event subscription is %s with response code %d", string(resp.Body), int(resp.StatusCode))
@@ -160,6 +164,7 @@ func (e *EventsRPCs) DeleteEventSubscription(ctx iris.Context) {
 
 	resp, err := e.DeleteEventSubscriptionRPC(ctxt, req)
 	if err != nil {
+		l.LogWithFields(ctxt).Error(err.Error())
 		common.SendFailedRPCCallResponse(ctx, err.Error())
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for deleting event subscription is %s with response code %d", string(resp.Body), int(resp.StatusCode))
@@ -182,6 +187,7 @@ func (e *EventsRPCs) GetEventSubscriptionsCollection(ctx iris.Context) {
 
 	resp, err := e.GetEventSubscriptionsCollectionRPC(ctxt, req)
 	if err != nil {
+		l.LogWithFields(ctxt).Error(err.Error())
 		common.SendFailedRPCCallResponse(ctx, err.Error())
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting event subscription collections is %s with response code %d", string(resp.Body), int(resp.StatusCode))
