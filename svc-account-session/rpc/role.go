@@ -52,17 +52,9 @@ var (
 // The function also checks for the session time out of the token
 // which is present in the request.
 func (r *Role) CreateRole(ctx context.Context, req *roleproto.RoleRequest) (*roleproto.RoleResponse, error) {
-	ctx = common.GetContextData(ctx)
-	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
-	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	ctx = getContext(ctx)
 	var resp roleproto.RoleResponse
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
+	errorArgs := getEmptyErrorArgs()
 	args := &response.Args{
 		Code:      response.GeneralError,
 		Message:   "",
@@ -79,9 +71,7 @@ func (r *Role) CreateRole(ctx context.Context, req *roleproto.RoleRequest) (*rol
 
 	err := UpdateLastUsedTimeFunc(ctx, req.SessionToken)
 	if err != nil {
-		errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+		resp, errorArgs = getRoleResponseWhenUpdateFailed(ctx, resp, errorArgs, args, err)
 		return &resp, nil
 	}
 
@@ -92,12 +82,8 @@ func (r *Role) CreateRole(ctx context.Context, req *roleproto.RoleRequest) (*rol
 	body, err := MarshalFunc(data.Body)
 	if err != nil {
 		errorMessage := "error while trying to marshal the response body of create role API: " + err.Error()
-		resp.StatusCode = http.StatusInternalServerError
-		resp.StatusMessage = response.InternalError
-		errorArgs[0].ErrorMessage = errorMessage
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
-		l.LogWithFields(ctx).Error(resp.StatusMessage)
+
+		resp, errorArgs = getRoleResponseWhenMarshallingfailed(ctx, resp, http.StatusInternalServerError, response.InternalError, errorMessage, errorArgs, args)
 		return &resp, nil
 	}
 	l.LogWithFields(ctx).Debugf("outgoing response of request to create a role: %s", string(body))
@@ -112,17 +98,9 @@ func (r *Role) CreateRole(ctx context.Context, req *roleproto.RoleRequest) (*rol
 // The function also checks for the session time out of the token
 // which is present in the request.
 func (r *Role) GetRole(ctx context.Context, req *roleproto.GetRoleRequest) (*roleproto.RoleResponse, error) {
-	ctx = common.GetContextData(ctx)
-	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
-	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	ctx = getContext(ctx)
 	var resp roleproto.RoleResponse
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
+	errorArgs := getEmptyErrorArgs()
 	args := &response.Args{
 		Code:      response.GeneralError,
 		Message:   "",
@@ -139,9 +117,7 @@ func (r *Role) GetRole(ctx context.Context, req *roleproto.GetRoleRequest) (*rol
 
 	err := UpdateLastUsedTimeFunc(ctx, req.SessionToken)
 	if err != nil {
-		errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+		resp, errorArgs = getRoleResponseWhenUpdateFailed(ctx, resp, errorArgs, args, err)
 		return &resp, nil
 	}
 
@@ -152,12 +128,8 @@ func (r *Role) GetRole(ctx context.Context, req *roleproto.GetRoleRequest) (*rol
 	body, err := MarshalFunc(data.Body)
 	if err != nil {
 		errorMessage := "error while trying to marshal the response body of get role API: " + err.Error()
-		resp.StatusCode = http.StatusInternalServerError
-		resp.StatusMessage = response.InternalError
-		errorArgs[0].ErrorMessage = errorMessage
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
-		l.LogWithFields(ctx).Error(resp.StatusMessage)
+
+		resp, errorArgs = getRoleResponseWhenMarshallingfailed(ctx, resp, http.StatusInternalServerError, response.InternalError, errorMessage, errorArgs, args)
 		return &resp, nil
 	}
 	l.LogWithFields(ctx).Debugf("outgoing response of request to view role details: %s", string(body))
@@ -173,17 +145,9 @@ func (r *Role) GetRole(ctx context.Context, req *roleproto.GetRoleRequest) (*rol
 // The function also checks for the session time out of the token
 // which is present in the request.
 func (r *Role) GetAllRoles(ctx context.Context, req *roleproto.GetRoleRequest) (*roleproto.RoleResponse, error) {
-	ctx = common.GetContextData(ctx)
-	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
-	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	ctx = getContext(ctx)
 	var resp roleproto.RoleResponse
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
+	errorArgs := getEmptyErrorArgs()
 	args := &response.Args{
 		Code:      response.GeneralError,
 		Message:   "",
@@ -199,9 +163,7 @@ func (r *Role) GetAllRoles(ctx context.Context, req *roleproto.GetRoleRequest) (
 
 	err := UpdateLastUsedTimeFunc(ctx, req.SessionToken)
 	if err != nil {
-		errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+		resp, errorArgs = getRoleResponseWhenUpdateFailed(ctx, resp, errorArgs, args, err)
 		return &resp, nil
 	}
 
@@ -212,12 +174,8 @@ func (r *Role) GetAllRoles(ctx context.Context, req *roleproto.GetRoleRequest) (
 	body, err := MarshalFunc(data.Body)
 	if err != nil {
 		errorMessage := "error while trying to marshal the response body of the get all roles API: " + err.Error()
-		resp.StatusCode = http.StatusInternalServerError
-		resp.StatusMessage = response.InternalError
-		errorArgs[0].ErrorMessage = errorMessage
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
-		l.LogWithFields(ctx).Error(resp.StatusMessage)
+
+		resp, errorArgs = getRoleResponseWhenMarshallingfailed(ctx, resp, http.StatusInternalServerError, response.InternalError, errorMessage, errorArgs, args)
 		return &resp, nil
 	}
 	l.LogWithFields(ctx).Debugf("outgoing response of request to view all roles: %s", string(body))
@@ -233,17 +191,9 @@ func (r *Role) GetAllRoles(ctx context.Context, req *roleproto.GetRoleRequest) (
 // The function also checks for the session time out of the token
 // which is present in the request.
 func (r *Role) UpdateRole(ctx context.Context, req *roleproto.UpdateRoleRequest) (*roleproto.RoleResponse, error) {
-	ctx = common.GetContextData(ctx)
-	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
-	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	ctx = getContext(ctx)
 	var resp roleproto.RoleResponse
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
+	errorArgs := getEmptyErrorArgs()
 	args := &response.Args{
 		Code:      response.GeneralError,
 		Message:   "",
@@ -260,9 +210,7 @@ func (r *Role) UpdateRole(ctx context.Context, req *roleproto.UpdateRoleRequest)
 
 	err := UpdateLastUsedTimeFunc(ctx, req.SessionToken)
 	if err != nil {
-		errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+		resp, errorArgs = getRoleResponseWhenUpdateFailed(ctx, resp, errorArgs, args, err)
 		return &resp, nil
 	}
 
@@ -273,12 +221,8 @@ func (r *Role) UpdateRole(ctx context.Context, req *roleproto.UpdateRoleRequest)
 	body, err := MarshalFunc(data.Body)
 	if err != nil {
 		errorMessage := "error while trying to marshal the response body of the update role API: " + err.Error()
-		resp.StatusCode = http.StatusInternalServerError
-		resp.StatusMessage = response.InternalError
-		errorArgs[0].ErrorMessage = errorMessage
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
-		l.LogWithFields(ctx).Error(resp.StatusMessage)
+
+		resp, errorArgs = getRoleResponseWhenMarshallingfailed(ctx, resp, http.StatusInternalServerError, response.InternalError, errorMessage, errorArgs, args)
 		return &resp, nil
 	}
 	l.LogWithFields(ctx).Debugf("outgoing response of request to update the role: %s", string(body))
@@ -289,17 +233,9 @@ func (r *Role) UpdateRole(ctx context.Context, req *roleproto.UpdateRoleRequest)
 
 // DeleteRole handles the RPC call from the client
 func (r *Role) DeleteRole(ctx context.Context, req *roleproto.DeleteRoleRequest) (*roleproto.RoleResponse, error) {
-	ctx = common.GetContextData(ctx)
-	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
-	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	ctx = getContext(ctx)
 	var resp roleproto.RoleResponse
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
+	errorArgs := getEmptyErrorArgs()
 	args := &response.Args{
 		Code:      response.GeneralError,
 		Message:   "",
@@ -313,16 +249,48 @@ func (r *Role) DeleteRole(ctx context.Context, req *roleproto.DeleteRoleRequest)
 	body, err := MarshalFunc(data.Body)
 	if err != nil {
 		errorMessage := "error while trying to marshal the response body of the delete role API: " + err.Error()
-		resp.StatusCode = http.StatusInternalServerError
-		resp.StatusMessage = response.InternalError
-		errorArgs[0].ErrorMessage = errorMessage
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
-		l.LogWithFields(ctx).Error(resp.StatusMessage)
+
+		resp, errorArgs = getRoleResponseWhenMarshallingfailed(ctx, resp, http.StatusInternalServerError, response.InternalError, errorMessage, errorArgs, args)
 		return &resp, nil
 	}
 	l.LogWithFields(ctx).Debugf("outgoing response of request to delete the role: %s", string(body))
 	resp.Body = body
 
 	return &resp, nil
+}
+
+func getRoleResponseWhenMarshallingfailed(ctx context.Context, resp roleproto.RoleResponse, statusCode int32, statusMessage string, errorMessage string, errorArgs []response.ErrArgs, args *response.Args) (roleproto.RoleResponse, []response.ErrArgs) {
+	resp.StatusCode = statusCode
+	resp.StatusMessage = statusMessage
+	errorArgs[0].ErrorMessage = errorMessage
+	errorArgs[0].StatusMessage = resp.StatusMessage
+	resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+	l.LogWithFields(ctx).Error(resp.StatusMessage)
+
+	return resp, errorArgs
+}
+
+func getRoleResponseWhenUpdateFailed(ctx context.Context, resp roleproto.RoleResponse, errorArgs []response.ErrArgs, args *response.Args, err error) (roleproto.RoleResponse, []response.ErrArgs) {
+	errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
+	errorArgs[0].StatusMessage = resp.StatusMessage
+	resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+
+	return resp, errorArgs
+}
+
+func getContext(ctx context.Context) context.Context {
+	ctx = common.GetContextData(ctx)
+	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
+	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	return ctx
+}
+
+func getEmptyErrorArgs() []response.ErrArgs {
+	return []response.ErrArgs{
+		response.ErrArgs{
+			StatusMessage: "",
+			ErrorMessage:  "",
+			MessageArgs:   []interface{}{},
+		},
+	}
 }

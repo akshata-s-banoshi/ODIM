@@ -53,17 +53,9 @@ var podName = os.Getenv("POD_NAME")
 // The function also checks for the session time out of the token
 // which is present in the request.
 func (a *Account) Create(ctx context.Context, req *accountproto.CreateAccountRequest) (*accountproto.AccountResponse, error) {
-	ctx = common.GetContextData(ctx)
-	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
-	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	ctx = getContext(ctx)
 	var resp accountproto.AccountResponse
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
+	errorArgs := getEmptyErrorArgs()
 	args := &response.Args{
 		Code:      response.GeneralError,
 		Message:   "",
@@ -79,9 +71,7 @@ func (a *Account) Create(ctx context.Context, req *accountproto.CreateAccountReq
 
 	err := UpdateLastUsedTimeFunc(ctx, req.SessionToken)
 	if err != nil {
-		errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+		resp, errorArgs = getAccountResponseWhenUpdateFailed(ctx, resp, errorArgs, args, err)
 		return &resp, nil
 	}
 
@@ -96,10 +86,7 @@ func (a *Account) Create(ctx context.Context, req *accountproto.CreateAccountReq
 		return &resp, nil
 	}
 	l.LogWithFields(ctx).Debugf("outgoing response of request to create an account: %s", string(body))
-	resp.Body = body
-	resp.StatusCode = data.StatusCode
-	resp.StatusMessage = data.StatusMessage
-	resp.Header = data.Header
+	resp = mapAccountResponse(resp, body, data)
 
 	return &resp, nil
 }
@@ -111,17 +98,9 @@ func (a *Account) Create(ctx context.Context, req *accountproto.CreateAccountReq
 // The function also checks for the session time out of the token
 // which is present in the request.
 func (a *Account) GetAllAccounts(ctx context.Context, req *accountproto.AccountRequest) (*accountproto.AccountResponse, error) {
-	ctx = common.GetContextData(ctx)
-	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
-	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	ctx = getContext(ctx)
 	var resp accountproto.AccountResponse
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
+	errorArgs := getEmptyErrorArgs()
 	args := &response.Args{
 		Code:      response.GeneralError,
 		Message:   "",
@@ -137,9 +116,7 @@ func (a *Account) GetAllAccounts(ctx context.Context, req *accountproto.AccountR
 
 	err := UpdateLastUsedTimeFunc(ctx, req.SessionToken)
 	if err != nil {
-		errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+		resp, errorArgs = getAccountResponseWhenUpdateFailed(ctx, resp, errorArgs, args, err)
 		return &resp, nil
 	}
 
@@ -152,10 +129,7 @@ func (a *Account) GetAllAccounts(ctx context.Context, req *accountproto.AccountR
 		return &resp, fmt.Errorf(resp.StatusMessage)
 	}
 	l.LogWithFields(ctx).Debugf("outgoing response of request to view all accounts: %s", string(body))
-	resp.Body = body
-	resp.StatusCode = data.StatusCode
-	resp.StatusMessage = data.StatusMessage
-	resp.Header = data.Header
+	resp = mapAccountResponse(resp, body, data)
 
 	return &resp, err
 }
@@ -167,17 +141,9 @@ func (a *Account) GetAllAccounts(ctx context.Context, req *accountproto.AccountR
 // The function also checks for the session time out of the token
 // which is present in the request.
 func (a *Account) GetAccount(ctx context.Context, req *accountproto.GetAccountRequest) (*accountproto.AccountResponse, error) {
-	ctx = common.GetContextData(ctx)
-	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
-	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	ctx = getContext(ctx)
 	var resp accountproto.AccountResponse
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
+	errorArgs := getEmptyErrorArgs()
 	args := &response.Args{
 		Code:      response.GeneralError,
 		Message:   "",
@@ -193,9 +159,7 @@ func (a *Account) GetAccount(ctx context.Context, req *accountproto.GetAccountRe
 
 	err := UpdateLastUsedTimeFunc(ctx, req.SessionToken)
 	if err != nil {
-		errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+		resp, errorArgs = getAccountResponseWhenUpdateFailed(ctx, resp, errorArgs, args, err)
 		return &resp, nil
 	}
 
@@ -208,10 +172,7 @@ func (a *Account) GetAccount(ctx context.Context, req *accountproto.GetAccountRe
 		return &resp, fmt.Errorf(resp.StatusMessage)
 	}
 	l.LogWithFields(ctx).Debugf("outgoing response of request to view the account: %s", string(body))
-	resp.Body = body
-	resp.StatusCode = data.StatusCode
-	resp.StatusMessage = data.StatusMessage
-	resp.Header = data.Header
+	resp = mapAccountResponse(resp, body, data)
 
 	return &resp, nil
 }
@@ -223,17 +184,9 @@ func (a *Account) GetAccount(ctx context.Context, req *accountproto.GetAccountRe
 // The function also checks for the session time out of the token
 // which is present in the request.
 func (a *Account) GetAccountServices(ctx context.Context, req *accountproto.AccountRequest) (*accountproto.AccountResponse, error) {
-	ctx = common.GetContextData(ctx)
-	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
-	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	ctx = getContext(ctx)
 	var resp accountproto.AccountResponse
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
+	errorArgs := getEmptyErrorArgs()
 	args := &response.Args{
 		Code:      response.GeneralError,
 		Message:   "",
@@ -248,9 +201,7 @@ func (a *Account) GetAccountServices(ctx context.Context, req *accountproto.Acco
 
 	err := UpdateLastUsedTimeFunc(ctx, req.SessionToken)
 	if err != nil {
-		errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+		resp, errorArgs = getAccountResponseWhenUpdateFailed(ctx, resp, errorArgs, args, err)
 		return &resp, nil
 	}
 
@@ -263,10 +214,7 @@ func (a *Account) GetAccountServices(ctx context.Context, req *accountproto.Acco
 		return &resp, fmt.Errorf(resp.StatusMessage)
 	}
 	l.LogWithFields(ctx).Debugf("outgoing response of request to view the account session: %s", string(body))
-	resp.Body = body
-	resp.StatusCode = data.StatusCode
-	resp.StatusMessage = data.StatusMessage
-	resp.Header = data.Header
+	resp = mapAccountResponse(resp, body, data)
 
 	return &resp, err
 }
@@ -278,18 +226,10 @@ func (a *Account) GetAccountServices(ctx context.Context, req *accountproto.Acco
 // The function also checks for the session time out of the token
 // which is present in the request.
 func (a *Account) Update(ctx context.Context, req *accountproto.UpdateAccountRequest) (*accountproto.AccountResponse, error) {
-	ctx = common.GetContextData(ctx)
-	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
-	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	ctx = getContext(ctx)
 	var resp accountproto.AccountResponse
 	l.LogWithFields(ctx).Info("Validating session and updating the last used time of the session before updating the account")
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
+	errorArgs := getEmptyErrorArgs()
 	args := &response.Args{
 		Code:      response.GeneralError,
 		Message:   "",
@@ -303,9 +243,7 @@ func (a *Account) Update(ctx context.Context, req *accountproto.UpdateAccountReq
 
 	err := UpdateLastUsedTimeFunc(ctx, req.SessionToken)
 	if err != nil {
-		errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+		resp, errorArgs = getAccountResponseWhenUpdateFailed(ctx, resp, errorArgs, args, err)
 		return &resp, nil
 	}
 
@@ -320,10 +258,7 @@ func (a *Account) Update(ctx context.Context, req *accountproto.UpdateAccountReq
 		return &resp, nil
 	}
 	l.LogWithFields(ctx).Debugf("outgoing response of request to update the account: %s", string(body))
-	resp.Body = body
-	resp.StatusCode = data.StatusCode
-	resp.StatusMessage = data.StatusMessage
-	resp.Header = data.Header
+	resp = mapAccountResponse(resp, body, data)
 
 	return &resp, nil
 }
@@ -335,17 +270,9 @@ func (a *Account) Update(ctx context.Context, req *accountproto.UpdateAccountReq
 // The function also checks for the session time out of the token
 // which is present in the request.
 func (a *Account) Delete(ctx context.Context, req *accountproto.DeleteAccountRequest) (*accountproto.AccountResponse, error) {
-	ctx = common.GetContextData(ctx)
-	ctx = context.WithValue(ctx, common.ThreadName, common.SessionService)
-	ctx = context.WithValue(ctx, common.ProcessName, podName)
+	ctx = getContext(ctx)
 	var resp accountproto.AccountResponse
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
+	errorArgs := getEmptyErrorArgs()
 	args := &response.Args{
 		Code:      response.GeneralError,
 		Message:   "",
@@ -360,9 +287,7 @@ func (a *Account) Delete(ctx context.Context, req *accountproto.DeleteAccountReq
 
 	err := UpdateLastUsedTimeFunc(ctx, req.SessionToken)
 	if err != nil {
-		errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+		resp, errorArgs = getAccountResponseWhenUpdateFailed(ctx, resp, errorArgs, args, err)
 		return &resp, nil
 	}
 
@@ -376,10 +301,7 @@ func (a *Account) Delete(ctx context.Context, req *accountproto.DeleteAccountReq
 		return &resp, nil
 	}
 	l.LogWithFields(ctx).Debugf("outgoing response of request to delete the account: %s", string(body))
-	resp.Body = body
-	resp.StatusCode = data.StatusCode
-	resp.StatusMessage = data.StatusMessage
-	resp.Header = data.Header
+	resp = mapAccountResponse(resp, body, data)
 
 	return &resp, nil
 }
@@ -403,4 +325,20 @@ func validateUpdateLastUsedTimeError(ctx context.Context, err error) (errorMessa
 	statusMessage = response.InternalError
 	l.LogWithFields(ctx).Error(errorMessage)
 	return
+}
+
+func mapAccountResponse(resp accountproto.AccountResponse, body []byte, data response.RPC) accountproto.AccountResponse {
+	resp.Body = body
+	resp.StatusCode = data.StatusCode
+	resp.StatusMessage = data.StatusMessage
+	resp.Header = data.Header
+	return resp
+}
+
+func getAccountResponseWhenUpdateFailed(ctx context.Context, resp accountproto.AccountResponse, errorArgs []response.ErrArgs, args *response.Args, err error) (accountproto.AccountResponse, []response.ErrArgs) {
+	errorArgs[0].ErrorMessage, resp.StatusCode, resp.StatusMessage = validateUpdateLastUsedTimeError(ctx, err)
+	errorArgs[0].StatusMessage = resp.StatusMessage
+	resp.Body, _ = json.Marshal(args.CreateGenericErrorResponse())
+
+	return resp, errorArgs
 }
