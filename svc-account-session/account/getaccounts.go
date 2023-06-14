@@ -97,10 +97,8 @@ func GetAllAccounts(ctx context.Context, session *asmodel.Session) response.RPC 
 	}
 
 	commonResponse.CreateGenericResponse(resp.StatusMessage)
-	commonResponse.Message = ""
 	commonResponse.ID = ""
-	commonResponse.MessageID = ""
-	commonResponse.Severity = ""
+	commonResponse = mapEmptyValuesResponseFields(commonResponse)
 	resp.Body = asresponse.List{
 		Response:     commonResponse,
 		MembersCount: len(users),
@@ -187,9 +185,7 @@ func GetAccount(ctx context.Context, session *asmodel.Session, accountID string)
 	}
 
 	commonResponse.CreateGenericResponse(resp.StatusMessage)
-	commonResponse.Message = ""
-	commonResponse.MessageID = ""
-	commonResponse.Severity = ""
+	commonResponse = mapEmptyValuesResponseFields(commonResponse)
 	resp.Body = asresponse.Account{
 		Response:     commonResponse,
 		UserName:     user.UserName,
@@ -239,9 +235,7 @@ func GetAccountService(ctx context.Context) response.RPC {
 	}
 
 	commonResponse.CreateGenericResponse(resp.StatusMessage)
-	commonResponse.Message = ""
-	commonResponse.MessageID = ""
-	commonResponse.Severity = ""
+	commonResponse = mapEmptyValuesResponseFields(commonResponse)
 	resp.Body = asresponse.AccountService{
 		Response: commonResponse,
 		//TODO: Yet to implement AccountService state and health
@@ -261,4 +255,12 @@ func GetAccountService(ctx context.Context) response.RPC {
 
 	return resp
 
+}
+
+// mapEmptyValuesResponseFields maps empty string values to Messsage, MessageID and Severity field of Response struct
+func mapEmptyValuesResponseFields(commonResponse response.Response) response.Response {
+	commonResponse.Message = ""
+	commonResponse.MessageID = ""
+	commonResponse.Severity = ""
+	return commonResponse
 }
