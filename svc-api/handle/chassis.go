@@ -28,6 +28,12 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
+const (
+	rpcErrorStr     = "RPC error: "
+	authTokenErrStr = "no X-Auth-Token found in request header"
+	allowedMethods  = "GET, POST"
+)
+
 // ChassisRPCs defines all the RPC methods in system service
 type ChassisRPCs struct {
 	GetChassisCollectionRPC func(ctx context.Context, req chassisproto.GetChassisRequest) (*chassisproto.GetChassisResponse, error)
@@ -63,7 +69,7 @@ func (chassis *ChassisRPCs) CreateChassis(ctx iris.Context) {
 	)
 
 	if rpcErr != nil {
-		l.LogWithFields(ctxt).Error("RPC error:" + rpcErr.Error())
+		l.LogWithFields(ctxt).Error(rpcErrorStr + rpcErr.Error())
 		re := common.GeneralError(http.StatusInternalServerError, response.InternalError, rpcErr.Error(), nil, nil)
 		writeResponse(ctx, re.Header, re.StatusCode, re.Body)
 		return
@@ -92,7 +98,7 @@ func (chassis *ChassisRPCs) GetChassisCollection(ctx iris.Context) {
 		URL:          ctx.Request().RequestURI}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting chassis collection with request uri %s", string(req.URL))
 	if req.SessionToken == "" {
-		errorMessage := "no X-Auth-Token found in request header"
+		errorMessage := authTokenErrStr
 		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
 		common.SetResponseHeader(ctx, response.Header)
 		ctx.StatusCode(http.StatusUnauthorized)
@@ -101,7 +107,7 @@ func (chassis *ChassisRPCs) GetChassisCollection(ctx iris.Context) {
 	}
 	resp, err := chassis.GetChassisCollectionRPC(ctxt, req)
 	if err != nil {
-		errorMessage := " RPC error:" + err.Error()
+		errorMessage := rpcErrorStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
 		common.SetResponseHeader(ctx, response.Header)
@@ -110,7 +116,7 @@ func (chassis *ChassisRPCs) GetChassisCollection(ctx iris.Context) {
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for get chassis collections with response body %s and status code %d", string(resp.Body), int(resp.StatusCode))
-	ctx.ResponseWriter().Header().Set("Allow", "GET, POST")
+	ctx.ResponseWriter().Header().Set("Allow", allowedMethods)
 	common.SetResponseHeader(ctx, resp.Header)
 	ctx.StatusCode(int(resp.StatusCode))
 	ctx.Write(resp.Body)
@@ -130,7 +136,7 @@ func (chassis *ChassisRPCs) GetChassisResource(ctx iris.Context) {
 		URL:          ctx.Request().RequestURI}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting chassis resources with request uri %s with request params %s and resource id %s", req.URL, req.RequestParam, req.ResourceID)
 	if req.SessionToken == "" {
-		errorMessage := "no X-Auth-Token found in request header"
+		errorMessage := authTokenErrStr
 		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
 		common.SetResponseHeader(ctx, response.Header)
 		ctx.StatusCode(http.StatusUnauthorized)
@@ -139,7 +145,7 @@ func (chassis *ChassisRPCs) GetChassisResource(ctx iris.Context) {
 	}
 	resp, err := chassis.GetChassisResourceRPC(ctxt, req)
 	if err != nil {
-		errorMessage := " RPC error:" + err.Error()
+		errorMessage := rpcErrorStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
 		common.SetResponseHeader(ctx, response.Header)
@@ -148,7 +154,7 @@ func (chassis *ChassisRPCs) GetChassisResource(ctx iris.Context) {
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for get chassis resources with response body %s and status code %d", string(resp.Body), int(resp.StatusCode))
-	ctx.ResponseWriter().Header().Set("Allow", "GET, POST")
+	ctx.ResponseWriter().Header().Set("Allow", allowedMethods)
 	ctx.ResponseWriter().Header().Set("Allow", "GET")
 	common.SetResponseHeader(ctx, resp.Header)
 	ctx.StatusCode(int(resp.StatusCode))
@@ -168,7 +174,7 @@ func (chassis *ChassisRPCs) GetChassis(ctx iris.Context) {
 		URL:          ctx.Request().RequestURI}
 	l.LogWithFields(ctxt).Debugf("Incoming request received for getting chassis with request uri %s and request params %s", req.URL, req.RequestParam)
 	if req.SessionToken == "" {
-		errorMessage := "no X-Auth-Token found in request header"
+		errorMessage := authTokenErrStr
 		response := common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errorMessage, nil, nil)
 		common.SetResponseHeader(ctx, response.Header)
 		ctx.StatusCode(http.StatusUnauthorized)
@@ -177,7 +183,7 @@ func (chassis *ChassisRPCs) GetChassis(ctx iris.Context) {
 	}
 	resp, err := chassis.GetChassisRPC(ctxt, req)
 	if err != nil {
-		errorMessage := "RPC error:" + err.Error()
+		errorMessage := rpcErrorStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		response := common.GeneralError(http.StatusInternalServerError, response.InternalError, errorMessage, nil, nil)
 		common.SetResponseHeader(ctx, response.Header)
@@ -186,7 +192,7 @@ func (chassis *ChassisRPCs) GetChassis(ctx iris.Context) {
 		return
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for get chassis with is %s with status code %d", string(resp.Body), int(resp.StatusCode))
-	ctx.ResponseWriter().Header().Set("Allow", "GET, POST")
+	ctx.ResponseWriter().Header().Set("Allow", allowedMethods)
 	ctx.ResponseWriter().Header().Set("Allow", "GET, PATCH, DELETE")
 	common.SetResponseHeader(ctx, resp.Header)
 	ctx.StatusCode(int(resp.StatusCode))
@@ -216,7 +222,7 @@ func (chassis *ChassisRPCs) UpdateChassis(ctx iris.Context) {
 	})
 
 	if rerr != nil {
-		l.LogWithFields(ctxt).Error("RPC error:" + rerr.Error())
+		l.LogWithFields(ctxt).Error(rpcErrorStr + rerr.Error())
 		re := common.GeneralError(http.StatusInternalServerError, response.InternalError, rerr.Error(), nil, nil)
 		writeResponse(ctx, re.Header, re.StatusCode, re.Body)
 		return
@@ -237,7 +243,7 @@ func (chassis *ChassisRPCs) DeleteChassis(ctx iris.Context) {
 	})
 
 	if rpcErr != nil {
-		l.LogWithFields(ctxt).Error("RPC error:" + rpcErr.Error())
+		l.LogWithFields(ctxt).Error(rpcErrorStr + rpcErr.Error())
 		re := common.GeneralError(http.StatusInternalServerError, response.InternalError, rpcErr.Error(), nil, nil)
 		writeResponse(ctx, re.Header, re.StatusCode, re.Body)
 		return

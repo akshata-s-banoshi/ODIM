@@ -25,6 +25,12 @@ import (
 	iris "github.com/kataras/iris/v12"
 )
 
+const (
+	allowedSystemMethods = "GET, PATCH"
+	systemsURI           = "/redfish/v1/Systems/"
+	requestBodyErrStr    = "error while trying to create JSON request body: "
+)
+
 // SystemRPCs defines all the RPC methods in account service
 type SystemRPCs struct {
 	GetSystemsCollectionRPC    func(ctx context.Context, req systemsproto.GetSystemsRequest) (*systemsproto.SystemsResponse, error)
@@ -86,7 +92,7 @@ func (sys *SystemRPCs) GetSystem(ctx iris.Context) {
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 	}
 	l.LogWithFields(ctxt).Debugf("Outgoing response for getting system details is %s with status code %d", string(resp.Body), int(resp.StatusCode))
-	ctx.ResponseWriter().Header().Set("Allow", "GET, PATCH")
+	ctx.ResponseWriter().Header().Set("Allow", allowedSystemMethods)
 	sendSystemsResponse(ctx, resp)
 }
 
@@ -117,14 +123,14 @@ func (sys *SystemRPCs) GetSystemResource(ctx iris.Context) {
 
 	storageID := ctx.Params().Get("id2")
 	switch req.URL {
-	case "/redfish/v1/Systems/" + req.RequestParam + "/Bios/Settings":
-		ctx.ResponseWriter().Header().Set("Allow", "GET, PATCH")
-	case "/redfish/v1/Systems/" + req.RequestParam + "/Storage/" + storageID + "/Volumes":
+	case systemsURI + req.RequestParam + "/Bios/Settings":
+		ctx.ResponseWriter().Header().Set("Allow", allowedSystemMethods)
+	case systemsURI + req.RequestParam + "/Storage/" + storageID + "/Volumes":
 		ctx.ResponseWriter().Header().Set("Allow", "GET, POST")
-	case "/redfish/v1/Systems/" + req.RequestParam + "/Storage/" + storageID + "/Volumes/" + req.ResourceID:
+	case systemsURI + req.RequestParam + "/Storage/" + storageID + "/Volumes/" + req.ResourceID:
 		ctx.ResponseWriter().Header().Set("Allow", "GET, DELETE")
-	case "/redfish/v1/Systems/" + req.RequestParam + "/SecureBoot":
-		ctx.ResponseWriter().Header().Set("Allow", "GET, PATCH")
+	case systemsURI + req.RequestParam + "/SecureBoot":
+		ctx.ResponseWriter().Header().Set("Allow", allowedSystemMethods)
 	default:
 		ctx.ResponseWriter().Header().Set("Allow", "GET")
 	}
@@ -207,7 +213,7 @@ func (sys *SystemRPCs) ChangeBiosSettings(ctx iris.Context) {
 	}
 	request, err := json.Marshal(req)
 	if err != nil {
-		errorMessage := "error while trying to create JSON request body: " + err.Error()
+		errorMessage := requestBodyErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -248,7 +254,7 @@ func (sys *SystemRPCs) ChangeBootOrderSettings(ctx iris.Context) {
 	}
 	request, err := json.Marshal(req)
 	if err != nil {
-		errorMessage := "error while trying to create JSON request body: " + err.Error()
+		errorMessage := requestBodyErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -289,7 +295,7 @@ func (sys *SystemRPCs) UpdateSecureBoot(ctx iris.Context) {
 	}
 	request, err := json.Marshal(req)
 	if err != nil {
-		errorMessage := "error while trying to create JSON request body: " + err.Error()
+		errorMessage := requestBodyErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -331,7 +337,7 @@ func (sys *SystemRPCs) ResetSecureBoot(ctx iris.Context) {
 	}
 	request, err := json.Marshal(req)
 	if err != nil {
-		errorMessage := "error while trying to create JSON request body: " + err.Error()
+		errorMessage := requestBodyErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -372,7 +378,7 @@ func (sys *SystemRPCs) CreateVolume(ctx iris.Context) {
 	}
 	request, err := json.Marshal(req)
 	if err != nil {
-		errorMessage := "error while trying to create JSON request body: " + err.Error()
+		errorMessage := requestBodyErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -409,7 +415,7 @@ func (sys *SystemRPCs) DeleteVolume(ctx iris.Context) {
 	ctx.ReadJSON(&req)
 	request, err := json.Marshal(req)
 	if err != nil {
-		errorMessage := "error while trying to create JSON request body: " + err.Error()
+		errorMessage := requestBodyErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return

@@ -53,9 +53,10 @@ type AggregatorRPCs struct {
 
 const (
 	// AuthTokenHeader holds the key of X-Auth-Token header
-	AuthTokenHeader        = "X-Auth-Token"
-	rpcCallFailedErrMsg    = "something went wrong with the RPC calls: "
-	invalidAuthTokenErrMsg = "no X-Auth-Token found in request header"
+	AuthTokenHeader         = "X-Auth-Token"
+	rpcCallFailedErrMsg     = "something went wrong with the RPC calls: "
+	invalidAuthTokenErrMsg  = "no X-Auth-Token found in request header"
+	aggregatorRequestErrStr = "error while trying to get JSON body from the aggregator request body: "
 )
 
 // GetAggregationService is the handler for getting AggregationService details
@@ -120,7 +121,7 @@ func (a *AggregatorRPCs) Reset(ctx iris.Context) {
 	}
 	resp, err := a.ResetRPC(ctxt, resetRequest)
 	if err != nil {
-		errorMessage := "RPC error: " + err.Error()
+		errorMessage := rpcErrorStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -167,7 +168,7 @@ func (a *AggregatorRPCs) SetDefaultBootOrder(ctx iris.Context) {
 	}
 	resp, err := a.SetDefaultBootOrderRPC(ctxt, resetRequest)
 	if err != nil {
-		errorMessage := "RPC error: " + err.Error()
+		errorMessage := rpcErrorStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -184,7 +185,7 @@ func (a *AggregatorRPCs) AddAggregationSource(ctx iris.Context) {
 	l.LogWithFields(ctxt).Debugf("Incoming request received for Adding aggregationsource")
 	err := ctx.ReadJSON(&req)
 	if err != nil {
-		errorMessage := "error while trying to get JSON body from the aggregator request body: " + err.Error()
+		errorMessage := aggregatorRequestErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
@@ -206,7 +207,7 @@ func (a *AggregatorRPCs) AddAggregationSource(ctx iris.Context) {
 	}
 	resp, err := a.AddAggregationSourceRPC(ctxt, addRequest)
 	if err != nil {
-		errorMessage := "RPC error: " + err.Error()
+		errorMessage := rpcErrorStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -229,7 +230,7 @@ func (a *AggregatorRPCs) GetAllAggregationSource(ctx iris.Context) {
 	}
 	resp, err := a.GetAllAggregationSourceRPC(ctxt, req)
 	if err != nil {
-		errorMessage := " RPC error:" + err.Error()
+		errorMessage := rpcErrorStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -254,7 +255,7 @@ func (a *AggregatorRPCs) GetAggregationSource(ctx iris.Context) {
 	}
 	resp, err := a.GetAggregationSourceRPC(ctxt, req)
 	if err != nil {
-		errorMessage := " RPC error:" + err.Error()
+		errorMessage := rpcErrorStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -271,7 +272,7 @@ func (a *AggregatorRPCs) UpdateAggregationSource(ctx iris.Context) {
 	var req interface{}
 	err := ctx.ReadJSON(&req)
 	if err != nil {
-		errorMessage := "error while trying to get JSON body from the aggregator request body: " + err.Error()
+		errorMessage := aggregatorRequestErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
@@ -295,7 +296,7 @@ func (a *AggregatorRPCs) UpdateAggregationSource(ctx iris.Context) {
 	l.LogWithFields(ctxt).Debugf("Incoming request received for updating aggregationsource with uri %s", updateRequest.URL)
 	resp, err := a.UpdateAggregationSourceRPC(ctxt, updateRequest)
 	if err != nil {
-		errorMessage := "RPC error: " + err.Error()
+		errorMessage := rpcErrorStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -321,7 +322,7 @@ func (a *AggregatorRPCs) DeleteAggregationSource(ctx iris.Context) {
 	}
 	resp, err := a.DeleteAggregationSourceRPC(ctxt, req)
 	if err != nil {
-		errorMessage := " RPC error:" + err.Error()
+		errorMessage := rpcErrorStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -337,7 +338,7 @@ func (a *AggregatorRPCs) CreateAggregate(ctx iris.Context) {
 	var req interface{}
 	err := ctx.ReadJSON(&req)
 	if err != nil {
-		errorMessage := "error while trying to get JSON body from the aggregator request body: " + err.Error()
+		errorMessage := aggregatorRequestErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
@@ -358,7 +359,7 @@ func (a *AggregatorRPCs) CreateAggregate(ctx iris.Context) {
 	}
 	resp, err := a.CreateAggregateRPC(ctxt, createRequest)
 	if err != nil {
-		errorMessage := "RPC error: " + err.Error()
+		errorMessage := rpcErrorStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendFailedRPCCallResponse(ctx, errorMessage)
 		return
@@ -446,7 +447,7 @@ func (a *AggregatorRPCs) AddElementsToAggregate(ctx iris.Context) {
 	var req interface{}
 	err := ctx.ReadJSON(&req)
 	if err != nil {
-		errorMessage := "error while trying to get JSON body from the aggregator request body: " + err.Error()
+		errorMessage := aggregatorRequestErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
@@ -485,7 +486,7 @@ func (a *AggregatorRPCs) RemoveElementsFromAggregate(ctx iris.Context) {
 	var req interface{}
 	err := ctx.ReadJSON(&req)
 	if err != nil {
-		errorMessage := "error while trying to get JSON body from the aggregator request body: " + err.Error()
+		errorMessage := aggregatorRequestErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
@@ -523,7 +524,7 @@ func (a *AggregatorRPCs) ResetAggregateElements(ctx iris.Context) {
 	var req interface{}
 	err := ctx.ReadJSON(&req)
 	if err != nil {
-		errorMessage := "error while trying to get JSON body from the aggregator request body: " + err.Error()
+		errorMessage := aggregatorRequestErrStr + err.Error()
 		l.LogWithFields(ctxt).Error(errorMessage)
 		common.SendMalformedJSONRequestErrResponse(ctx, errorMessage)
 	}
